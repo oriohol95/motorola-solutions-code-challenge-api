@@ -6,8 +6,8 @@ export class UserController {
   }
 
   getAll = async (req, res) => { // CRUD -> read
-    const { country, region } = req.query
-    const userList = await this.userModel.getAll({ country, region })
+    const { country, region, text, page, size } = req.query
+    const userList = await this.userModel.getAll({ country, region, text, page, size })
 
     res.json(userList)
   }

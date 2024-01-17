@@ -23,25 +23,49 @@ async function connect () {
 }
 
 export class UserModel {
-  static async getAll ({ country, region }) {
+  static async getAll ({ country, region, text, page = 1, size = 10 }) {
     const db = await connect()
 
-    let filter = {}
+    let query = {}
     if (country) {
-      filter = {
-        ...filter,
+      query = {
+        ...query,
         country
       }
     }
 
     if (region) {
-      filter = {
-        ...filter,
+      query = {
+        ...query,
         region
       }
     }
 
-    const array = await db.find(filter).toArray()
+    if (text) {
+      query = {
+        ...query,
+        $or: [
+          {
+            name: {
+              $regex: text,
+              $options: 'i'
+            }
+          },
+          {
+            email: {
+              $regex: text,
+              $options: 'i'
+            }
+          }
+        ]
+      }
+    }
+
+    const pageInt = Number(page)
+    const sizeInt = Number(size)
+    const skip = pageInt * sizeInt - sizeInt
+
+    const array = await db.find(query).limit(sizeInt).skip(skip).toArray()
     return array.map(({ _id, ...el }) => ({ id: _id, ...el }))
   }
 
